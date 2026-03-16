@@ -1,18 +1,10 @@
+import type {Task} from "../types";
+
 interface TaskProps {
-    task: {
-        id: string,
-        title: string,
-        status: 'todo' | 'in_progress' | 'in_review' | 'done',
-        user_id: string,
-        created_at: string,
-        description: string,
-        priority: 'low' | 'normal' | 'high',
-        due_date: string,
-        assignee_id: string
-    }
+    task: Task
 }
 
-function Task({task}: TaskProps) {
+function TaskCard({task}: TaskProps) {
     return (
     <div className="task">
         <div className="task-title"></div>
@@ -31,4 +23,4 @@ function Task({task}: TaskProps) {
     )
 }
 
-export default Task 
+export default TaskCard

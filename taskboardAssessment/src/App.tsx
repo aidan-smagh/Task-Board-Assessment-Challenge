@@ -1,12 +1,11 @@
-import { useState } from 'react'
 import './App.css'
-import Task from "./components/Task"
+import Home from "./pages/Home"
 
 function App() {
 
   return (
     <>
-      <Task task={{title: "example", description: "another example"}}/>
+      <Home/>
     </>
   )
 }
