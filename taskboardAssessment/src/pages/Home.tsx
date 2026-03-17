@@ -3,15 +3,15 @@ import { getAllTasks } from "../hooks/queries";
 import { useState, useEffect } from "react";
 import TaskCard from "../components/Task";
 import addTask from "../hooks/addTask";
-import type {Status} from "../types";
-import type {Priority} from "../types";
+import type { Status } from "../types";
+import type { Priority } from "../types";
 
 
 function Home() {
     const [tasks, setTasks] = useState<TaskType[]>([]);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(true);
-    
+
     //add task perameters
     const [title, setTitle] = useState("");
     const [status, setStatus] = useState<Status>("todo");
@@ -63,13 +63,13 @@ function Home() {
     };
 
     return (
-        <div>
+        <div className="min-h-screen bg-gray-50 px-4 py-8">
             <form onSubmit={handleSubmit} className="add-task-form">
-                <input value={title} onChange={e => setTitle(e.target.value)} placeholder="title"/>
-                <input value={description} onChange={e => setDescription(e.target.value)} placeholder="description"/>
-                <input value={due_date} onChange={e => setDue_Date(e.target.value)} placeholder="due_date"/>
+                <input value={title} onChange={e => setTitle(e.target.value)} placeholder="title" />
+                <input value={description} onChange={e => setDescription(e.target.value)} placeholder="description" />
+                <input value={due_date} onChange={e => setDue_Date(e.target.value)} placeholder="due_date" />
 
-                <select onChange={e =>setStatus(e.target.value as Status)}>
+                <select onChange={e => setStatus(e.target.value as Status)}>
                     <option value="todo">Todo</option>
                     <option value="in_progress">In Progress</option>
                     <option value="in_review">In Review</option>
@@ -82,20 +82,34 @@ function Home() {
                 </select>
                 <button type="submit">Add Task</button>
             </form>
-            <div>
-                {error && <div className="error-message">{error}</div>}
-                {loading ? (
-                    <div className="loading">Loading...</div>
-                ) : (
-                    <div className="tasks-grid">
-                        {tasks.map((task) => (
-                            <TaskCard task={task} key={task.id} />
-                        ))}
+            <div className="flex gap-4">
+                <div className="bg-gray border border-gray-200 rounded-xl shadow-sm p-6 basis-64">
+                    <p className="text-med font-medium text-gray-500 mb-4">To Do</p>
+                    <div>
+                        {error && <div className="error-message">{error}</div>}
+                        {loading ? (
+                            <div className="loading">Loading...</div>
+                        ) : (
+                            <div className="tasks-grid">
+                                {tasks.map((task) => (
+                                    <TaskCard task={task} key={task.id} />
+                                ))}
+                            </div>
+                        )}
                     </div>
-                )}
+                </div>
+                <div className="bg-black border border-gray-200 rounded-xl shadow-sm p-6 basis-64">
+                    <p className="text-med font-medium text-gray-500 mb-4">In Progress</p>
+                </div>
+                <div className="bg-black border border-gray-200 rounded-xl shadow-sm p-6 basis-64">
+                    <p className="text-med font-medium text-gray-500 mb-4">In Review</p>
+                </div>
+                <div className="bg-black border border-gray-200 rounded-xl shadow-sm p-6 basis-64">
+                    <p className="text-med font-medium text-gray-500 mb-4">Done</p>
+                </div>
             </div>
         </div>
     );
 }
 
-export default Home
+            export default Home
