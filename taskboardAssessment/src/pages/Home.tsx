@@ -82,9 +82,9 @@ function Home() {
                 </select>
                 <button type="submit">Add Task</button>
             </form>
-            <div className="flex gap-4">
+            <div className="flex gap-4 justify-center">
                 <div className="bg-gray border border-gray-200 rounded-xl shadow-sm p-6 basis-64">
-                    <p className="text-med font-medium text-gray-500 mb-4">To Do</p>
+                    <p className="text-med font-medium text-gray-600 mb-4">To Do</p>
                     <div>
                         {error && <div className="error-message">{error}</div>}
                         {loading ? (
@@ -92,20 +92,56 @@ function Home() {
                         ) : (
                             <div className="tasks-grid">
                                 {tasks.map((task) => (
-                                    <TaskCard task={task} key={task.id} />
+                                    task.status?.startsWith("todo") && <TaskCard task={task} key={task.id} />
                                 ))}
                             </div>
                         )}
                     </div>
                 </div>
-                <div className="bg-black border border-gray-200 rounded-xl shadow-sm p-6 basis-64">
-                    <p className="text-med font-medium text-gray-500 mb-4">In Progress</p>
+                <div className="bg-gray border border-gray-200 rounded-xl shadow-sm p-6 basis-64">
+                    <p className="text-med font-medium text-blue-700 mb-4">In Progress</p>
+                    <div>
+                        {error && <div className="error-message">{error}</div>}
+                        {loading ? (
+                            <div className="loading">Loading...</div>
+                        ) : (
+                            <div className="tasks-grid">
+                                {tasks.map((task) => (
+                                    task.status?.startsWith("in_progress") && <TaskCard task={task} key={task.id} />
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </div>
-                <div className="bg-black border border-gray-200 rounded-xl shadow-sm p-6 basis-64">
-                    <p className="text-med font-medium text-gray-500 mb-4">In Review</p>
+                <div className="bg-gray border border-gray-200 rounded-xl shadow-sm p-6 basis-64">
+                    <p className="text-med font-medium text-purple-700 mb-4">In Review</p>
+                    <div>
+                        {error && <div className="error-message">{error}</div>}
+                        {loading ? (
+                            <div className="loading">Loading...</div>
+                        ) : (
+                            <div className="tasks-grid">
+                                {tasks.map((task) => (
+                                    task.status?.startsWith("in_review") && <TaskCard task={task} key={task.id} />
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </div>
-                <div className="bg-black border border-gray-200 rounded-xl shadow-sm p-6 basis-64">
-                    <p className="text-med font-medium text-gray-500 mb-4">Done</p>
+                <div className="bg-gray border border-gray-200 rounded-xl shadow-sm p-6 basis-64">
+                    <p className="text-med font-medium text-green-700 mb-4">Done</p>
+                    <div>
+                        {error && <div className="error-message">{error}</div>}
+                        {loading ? (
+                            <div className="loading">Loading...</div>
+                        ) : (
+                            <div className="tasks-grid">
+                                {tasks.map((task) => (
+                                    task.status?.startsWith("done") && <TaskCard task={task} key={task.id} />
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>
