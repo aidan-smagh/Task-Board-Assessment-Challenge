@@ -13,15 +13,13 @@ function Home() {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(true);
 
-    //add task perameters
+    //add task perameters for form
     const [title, setTitle] = useState("");
     const [status, setStatus] = useState<Status>("todo");
     const [description, setDescription] = useState("");
     const [priority, setPriority] = useState<Priority>("normal");
     const [due_date, setDue_Date] = useState("");
-
-    //drag and drop
-    const [dragIndicator, setDragIndicator] = useState<string | null>(null);
+    const [showForm, setShowForm] = useState(false);
 
     useEffect(() => {
         const loadTasks = async () => {
@@ -39,7 +37,7 @@ function Home() {
         }
         loadTasks();
     }, []);
-    
+
     const handleDragStart = (e: React.DragEvent<HTMLDivElement>, task: string) => {
         e.dataTransfer.setData("text", task)
     }
@@ -53,9 +51,9 @@ function Home() {
         const taskID = e.dataTransfer.getData("text");
 
         //update in db
-        const {error} = await supabase
+        const { error } = await supabase
             .from('tasks')
-            .update({status: newStatus})
+            .update({ status: newStatus })
             .eq('id', taskID)
         if (error) {
             console.error(error)
@@ -87,6 +85,7 @@ function Home() {
             setPriority("normal");
             setStatus("todo");
             setDue_Date("");
+            setShowForm(false);
         } catch (err) {
             console.error(err);
             setError("Failed to add task");
@@ -94,96 +93,87 @@ function Home() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 px-4 py-8">
-            {/* form */}
-            <form onSubmit={handleSubmit} className="add-task-form">
-                <input value={title} onChange={e => setTitle(e.target.value)} placeholder="title" />
-                <input value={description} onChange={e => setDescription(e.target.value)} placeholder="description" />
-                <input value={due_date} onChange={e => setDue_Date(e.target.value)} placeholder="due_date" />
+        <div className="min-h-screen bg-gray-50 px-4 py-2">
+            <p className="text-gray-600 text-2xl font-semibold">Task Manager</p>
+            <div className="mb-8 flex justify-end items-center px-4">
+                <button
+                    onClick={() => setShowForm(!showForm)}
+                    className="bg-gray-900 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-gray-700 transition-colors"
+                >
+                    {showForm ? 'Cancel' : 'Add Task'}
+                </button>
+            </div>
+                {showForm && (
+                    <form onSubmit={handleSubmit} className="flex gap-3 mt-4 mb-8">
+                        <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Title" className="border border-gray-200 rounded-lg px-3 py-2 text-sm flex-1" />
+                        <input value={description} onChange={e => setDescription(e.target.value)} placeholder="Description" className="border border-gray-200 rounded-lg px-3 py-2 text-sm flex-1" />
+                        <input value={due_date} onChange={e => setDue_Date(e.target.value)} placeholder="Due date" className="border border-gray-200 rounded-lg px-3 py-2 text-sm" />
+                        <select value={status} onChange={e => setStatus(e.target.value as Status)} className="border border-gray-200 rounded-lg px-3 py-2 text-sm">
+                            <option value="todo">To Do</option>
+                            <option value="in_progress">In Progress</option>
+                            <option value="in_review">In Review</option>
+                            <option value="done">Done</option>
+                        </select>
+                        <select value={priority} onChange={e => setPriority(e.target.value as Priority)} className="border border-gray-200 rounded-lg px-3 py-2 text-sm">
+                            <option value="low">Low</option>
+                            <option value="normal">Normal</option>
+                            <option value="high">High</option>
+                        </select>
+                        <button type="submit" className="bg-gray-900 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-gray-700 transition-colors">
+                            Add Task
+                        </button>
+                    </form>
+                )}
 
-                <select onChange={e => setStatus(e.target.value as Status)}>
-                    <option value="todo">Todo</option>
-                    <option value="in_progress">In Progress</option>
-                    <option value="in_review">In Review</option>
-                    <option value="done">Done</option>
-                </select>
-                <select onChange={e => setPriority(e.target.value as Priority)}>
-                    <option value="low">Low</option>
-                    <option value="normal">Normal</option>
-                    <option value="high">High</option>
-                </select>
-                <button type="submit">Add Task</button>
-            </form>
-            {/* todo column */}
-            <div className="flex gap-4 justify-center">
-                <div className="bg-gray border border-gray-200 rounded-xl shadow-sm p-6 basis-64"
-                onDragOver={e => e.preventDefault()}
-                onDrop={e => handleDrop(e, 'todo')}>
-                    <p className="text-med font-medium text-gray-600 mb-4">To Do</p>
-                    <div>
-                        {error && <div className="error-message">{error}</div>}
-                        {loading ? (
-                            <div className="loading">Loading...</div>
-                        ) : (
-                            <div className="tasks-grid">
-                                {tasks.map((task) => (
-                                    task.status?.startsWith("todo") && <TaskCard task={task} onDragStart={(e) => handleDragStart(e, task.id)} key={task.id} />
-                                ))}
-                            </div>
+            <div className="flex gap-4">
+                <div className="flex-1 bg-white border border-gray-200 rounded-xl shadow-sm p-6"
+                    onDragOver={e => e.preventDefault()}
+                    onDrop={e => handleDrop(e, 'todo')}>
+                    <p className="text-sm font-medium text-gray-600 mb-4">To Do</p>
+                    <div className="flex flex-col gap-3">
+                        {loading ? <div className="text-sm text-gray-400">Loading...</div> : (
+                            tasks.map(task =>
+                                task.status?.startsWith("todo") && <TaskCard task={task} onDragStart={(e) => handleDragStart(e, task.id)} key={task.id} />
+                            )
                         )}
                     </div>
                 </div>
-                {/* in progress column */}
-                <div className="bg-gray border border-gray-200 rounded-xl shadow-sm p-6 basis-64"
-                onDragOver={e => e.preventDefault()}
-                onDrop={e => handleDrop(e, 'in_progress')}>
-                    <p className="text-med font-medium text-blue-700 mb-4">In Progress</p>
-                    <div>
-                        {error && <div className="error-message">{error}</div>}
-                        {loading ? (
-                            <div className="loading">Loading...</div>
-                        ) : (
-                            <div className="tasks-grid">
-                                {tasks.map((task) => (
-                                    task.status?.startsWith("in_progress") && <TaskCard task={task} onDragStart={(e) => handleDragStart(e, task.id)} key={task.id} />
-                                ))}
-                            </div>
+
+                <div className="flex-1 bg-white border border-gray-200 rounded-xl shadow-sm p-6"
+                    onDragOver={e => e.preventDefault()}
+                    onDrop={e => handleDrop(e, 'in_progress')}>
+                    <p className="text-sm font-medium text-blue-700 mb-4">In Progress</p>
+                    <div className="flex flex-col gap-3">
+                        {loading ? <div className="text-sm text-gray-400">Loading...</div> : (
+                            tasks.map(task =>
+                                task.status?.startsWith("in_progress") && <TaskCard task={task} onDragStart={(e) => handleDragStart(e, task.id)} key={task.id} />
+                            )
                         )}
                     </div>
                 </div>
-                {/* in review column */}
-                <div className="bg-gray border border-gray-200 rounded-xl shadow-sm p-6 basis-64"
-                onDragOver={e => e.preventDefault()}
-                onDrop={e => handleDrop(e, 'in_review')}>
-                    <p className="text-med font-medium text-purple-700 mb-4">In Review</p>
-                    <div>
-                        {error && <div className="error-message">{error}</div>}
-                        {loading ? (
-                            <div className="loading">Loading...</div>
-                        ) : (
-                            <div className="tasks-grid">
-                                {tasks.map((task) => (
-                                    task.status?.startsWith("in_review") && <TaskCard task={task} onDragStart={(e) => handleDragStart(e, task.id)} key={task.id} />
-                                ))}
-                            </div>
+
+                <div className="flex-1 bg-white border border-gray-200 rounded-xl shadow-sm p-6"
+                    onDragOver={e => e.preventDefault()}
+                    onDrop={e => handleDrop(e, 'in_review')}>
+                    <p className="text-sm font-medium text-purple-700 mb-4">In Review</p>
+                    <div className="flex flex-col gap-3">
+                        {loading ? <div className="text-sm text-gray-400">Loading...</div> : (
+                            tasks.map(task =>
+                                task.status?.startsWith("in_review") && <TaskCard task={task} onDragStart={(e) => handleDragStart(e, task.id)} key={task.id} />
+                            )
                         )}
                     </div>
                 </div>
-                {/* done column */}
-                <div className="bg-gray border border-gray-200 rounded-xl shadow-sm p-6 basis-64"
-                onDragOver={e => e.preventDefault()}
-                onDrop={e => handleDrop(e, 'done')}>
-                    <p className="text-med font-medium text-green-700 mb-4">Done</p>
-                    <div>
-                        {error && <div className="error-message">{error}</div>}
-                        {loading ? (
-                            <div className="loading">Loading...</div>
-                        ) : (
-                            <div className="tasks-grid">
-                                {tasks.map((task) => (
-                                    task.status?.startsWith("done") && <TaskCard task={task} onDragStart={(e) => handleDragStart(e, task.id)} key={task.id} />
-                                ))}
-                            </div>
+
+                <div className="flex-1 bg-white border border-gray-200 rounded-xl shadow-sm p-6"
+                    onDragOver={e => e.preventDefault()}
+                    onDrop={e => handleDrop(e, 'done')}>
+                    <p className="text-sm font-medium text-green-700 mb-4">Done</p>
+                    <div className="flex flex-col gap-3">
+                        {loading ? <div className="text-sm text-gray-400">Loading...</div> : (
+                            tasks.map(task =>
+                                task.status?.startsWith("done") && <TaskCard task={task} onDragStart={(e) => handleDragStart(e, task.id)} key={task.id} />
+                            )
                         )}
                     </div>
                 </div>
