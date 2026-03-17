@@ -4,7 +4,7 @@ export type Priority = 'low' | 'normal' | 'high'
 export interface Task {
     id: string,
     title: string,
-    status?: Status,
+    status: Status,
     user_id?: string,
     created_at?: string,
     description?: string,
