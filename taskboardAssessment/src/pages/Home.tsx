@@ -1,6 +1,7 @@
 import type { Task as TaskType } from "../types";
 import { getAllTasks } from "../hooks/getAllTasks";
 import { deleteTask } from "../hooks/deleteTask"
+import { updateTask } from "../hooks/updateTask"
 import { useState, useEffect } from "react";
 import TaskCard from "../components/Task";
 import addTask from "../hooks/addTask";
@@ -11,7 +12,7 @@ import { supabase } from "../lib/supabase";
 
 function Home() {
     const [tasks, setTasks] = useState<TaskType[]>([]);
-    const [error, setError] = useState("");
+    const [_error, setError] = useState("");
     const [loading, setLoading] = useState(true);
 
     //add task perameters for form
@@ -22,18 +23,22 @@ function Home() {
     const [due_date, setDue_Date] = useState("");
     const [showForm, setShowForm] = useState(false);
 
+    //deleting
     const [successMessage, setSuccessMessage] = useState("");
-    
+
+    //updating
+    const [selectedTask, setSelectedTask] = useState<TaskType | null>(null);
+
     //search and filter
     const [searchQuery, setSearchQuery] = useState("");
-    const [priorityFilter, setPriorityFilter] = useState<Priority | 'all'>('all')
+    const [priorityFilter, setPriorityFilter] = useState<Priority | 'all'>('all');
     const filteredTasks = tasks.filter(t => t.title.toLowerCase().includes(searchQuery.toLowerCase()) && priorityFilter === 'all' || t.priority === priorityFilter);
 
     //counts
-    const todoCount = tasks.filter(t => t.status === 'todo').length;
-    const inProgressCount = tasks.filter(t => t.status === 'in_progress').length
-    const inReviewCount = tasks.filter(t => t.status === 'in_review').length
-    const doneCount = tasks.filter(t => t.status === 'done').length
+    const todoCount = filteredTasks.filter(t => t.status === 'todo').length;
+    const inProgressCount = filteredTasks.filter(t => t.status === 'in_progress').length
+    const inReviewCount = filteredTasks.filter(t => t.status === 'in_review').length
+    const doneCount = filteredTasks.filter(t => t.status === 'done').length
 
 
     useEffect(() => {
@@ -119,17 +124,28 @@ function Home() {
         }
     }
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchQuery(e.target.value); 
+        setSearchQuery(e.target.value);
     }
 
+    const handleUpdate = async (id: string, updates: { title?: string, description?: string, due_date?: string, status?: Status , priority?: Priority}) => {
+        try {
+            await updateTask(id, updates);
+            setTasks(prev => prev.map(task =>
+                task.id === id ? { ...task, ...updates } : task
+            ));
+            setSuccessMessage("Task successfully updated.");
+        } catch (err) {
+            console.error(err);
+        }
+    }
     return (
         <div className="min-h-screen bg-gray-50 px-4 py-4">
             <p className="text-gray-600 text-2xl font-semibold">Task Manager</p>
             {successMessage && (
-                    <div className="bg-green-100 text-green-700 text-sm px-4 py-2 rounded-lg mb-4">
-                        {successMessage}
-                    </div>
-                )}
+                <div className="bg-green-100 text-green-700 text-sm px-4 py-2 rounded-lg mb-4">
+                    {successMessage}
+                </div>
+            )}
             <div className="mb-8 flex items-center px-10 py-5 md:justify-center gap-3">
                 <input value={searchQuery} onChange={handleSearch} placeholder="Search Tasks" className="bg-gray-900 text-white rounded-lg px-3 py-2 text-sm font-medium hover:bg-gray-700 transition-colors"></input>
                 <select className="bg-gray-900 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-gray-700 transition-colors" onChange={e => setPriorityFilter((e.target.value as Priority | "all"))}>
@@ -168,75 +184,135 @@ function Home() {
             )}
 
             <div className="flex gap-4">
-                <div className="flex-1 bg-white border border-gray-200 rounded-xl shadow-sm p-6"
-                    onDragOver={e => e.preventDefault()}
-                    onDrop={e => handleDrop(e, 'todo')}>
-                    <p className="text-sm font-medium text-gray-600 mb-4">To Do <span className="text-gray-400">({todoCount})</span></p>
-                    <div className="flex flex-col gap-3">
-                        {loading ? (
-                            <div className="text-sm text-gray-400">Loading...</div>
-                        ) : todoCount === 0 ? (
-                            <div className="text-sm text-gray-400 text-center py-6">No tasks yet</div>
-                        ) : (
-                            filteredTasks.filter(t => t.status === 'todo').map(task => (
-                                <TaskCard task={task} onDragStart={(e) => handleDragStart(e, task.id)} onDelete={() => handleDelete(task.id)} key={task.id} />
-                            ))
-                        )}
+                {/* columns */}
+                <div className="flex gap-4 flex-1">
+                    <div className="flex-1 bg-white border border-gray-200 rounded-xl shadow-sm p-6"
+                        onDragOver={e => e.preventDefault()}
+                        onDrop={e => handleDrop(e, 'todo')}>
+                        <p className="text-sm font-medium text-gray-600 mb-4">To Do <span className="text-gray-400">({todoCount})</span></p>
+                        <div className="flex flex-col gap-3">
+                            {loading ? (
+                                <div className="text-sm text-gray-400">Loading...</div>
+                            ) : todoCount === 0 ? (
+                                <div className="text-sm text-gray-400 text-center py-6">No tasks yet</div>
+                            ) : (
+                                filteredTasks.filter(t => t.status === 'todo').map(task => (
+                                    <TaskCard task={task} onDragStart={(e) => handleDragStart(e, task.id)} onDelete={() => handleDelete(task.id)} onUpdate={(updates) => handleUpdate(task.id, updates)} onClick={() => setSelectedTask(task)} key={task.id} />
+                                ))
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="flex-1 bg-white border border-gray-200 rounded-xl shadow-sm p-6"
+                        onDragOver={e => e.preventDefault()}
+                        onDrop={e => handleDrop(e, 'in_progress')}>
+                        <p className="text-sm font-medium text-blue-700 mb-4">In Progress <span className="text-gray-400">({inProgressCount})</span></p>
+                        <div className="flex flex-col gap-3">
+                            {loading ? (
+                                <div className="text-sm text-gray-400">Loading...</div>
+                            ) : inProgressCount === 0 ? (
+                                <div className="text-sm text-gray-400 text-center py-6">No tasks yet</div>
+                            ) : (
+                                filteredTasks.filter(t => t.status === 'in_progress').map(task => (
+                                    <TaskCard task={task} onDragStart={(e) => handleDragStart(e, task.id)} onDelete={() => handleDelete(task.id)} onUpdate={(updates) => handleUpdate(task.id, updates)} onClick={() => setSelectedTask(task)} key={task.id} />
+                                ))
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="flex-1 bg-white border border-gray-200 rounded-xl shadow-sm p-6"
+                        onDragOver={e => e.preventDefault()}
+                        onDrop={e => handleDrop(e, 'in_review')}>
+                        <p className="text-sm font-medium text-purple-700 mb-4">In Review <span className="text-gray-400">({inReviewCount})</span></p>
+                        <div className="flex flex-col gap-3">
+                            {loading ? (
+                                <div className="text-sm text-gray-400">Loading...</div>
+                            ) : inReviewCount === 0 ? (
+                                <div className="text-sm text-gray-400 text-center py-6">No tasks yet</div>
+                            ) : (
+                                filteredTasks.filter(t => t.status === 'in_review').map(task => (
+                                    <TaskCard task={task} onDragStart={(e) => handleDragStart(e, task.id)} onDelete={() => handleDelete(task.id)} onUpdate={(updates) => handleUpdate(task.id, updates)} onClick={() => setSelectedTask(task)} key={task.id} />
+                                ))
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="flex-1 bg-white border border-gray-200 rounded-xl shadow-sm p-6"
+                        onDragOver={e => e.preventDefault()}
+                        onDrop={e => handleDrop(e, 'done')}>
+                        <p className="text-sm font-medium text-green-700 mb-4">Done <span className="text-gray-400">({doneCount})</span></p>
+                        <div className="flex flex-col gap-3">
+                            {loading ? (
+                                <div className="text-sm text-gray-400">Loading...</div>
+                            ) : doneCount === 0 ? (
+                                <div className="text-sm text-gray-400 text-center py-6">No tasks yet</div>
+                            ) : (
+                                filteredTasks.filter(t => t.status === 'done').map(task => (
+                                    <TaskCard task={task} onDragStart={(e) => handleDragStart(e, task.id)} onDelete={() => handleDelete(task.id)} onUpdate={(updates) => handleUpdate(task.id, updates)} onClick={() => setSelectedTask(task)} key={task.id} />
+                                ))
+                            )}
+                        </div>
                     </div>
                 </div>
 
-                <div className="flex-1 bg-white border border-gray-200 rounded-xl shadow-sm p-6"
-                    onDragOver={e => e.preventDefault()}
-                    onDrop={e => handleDrop(e, 'in_progress')}>
-                    <p className="text-sm font-medium text-blue-700 mb-4">In Progress<span className="text-gray-400">({inProgressCount})</span></p>
-                    <div className="flex flex-col gap-3">
-                        {loading ? (
-                            <div className="text-sm text-gray-400">Loading...</div>
-                        ) : inProgressCount === 0 ? (
-                            <div className="text-sm text-gray-400 text-center py-6">No tasks yet</div>
-                        ) : (
-                            filteredTasks.filter(t => t.status === 'in_progress').map(task => (
-                                <TaskCard task={task} onDragStart={(e) => handleDragStart(e, task.id)} onDelete={() => handleDelete(task.id)} key={task.id} />
-                            ))
-                        )}
+                {/* expanded panel */}
+                {selectedTask && (
+                    <div className="w-80 bg-white border border-gray-200 rounded-xl shadow-sm p-6 flex flex-col gap-4">
+                        <div className="flex justify-between items-center">
+                            <p className="text-gray-600 text-2xl font-semibold">Edit Task</p>
+                            <button onClick={() => setSelectedTask(null)} className="text-gray-400 hover:text-gray-600">✕</button>
+                        </div>
+                        <input
+                            value={selectedTask.title ?? ''}
+                            onChange={e => setSelectedTask({ ...selectedTask, title: e.target.value })}
+                            className="border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                            placeholder="Title"
+                        />
+                        <input
+                            value={selectedTask.description ?? ''}
+                            onChange={e => setSelectedTask({ ...selectedTask, description: e.target.value })}
+                            className="border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                            placeholder="Description"
+                        />
+                        <input
+                            type="date"
+                            value={selectedTask.due_date ?? ''}
+                            onChange={e => setSelectedTask({ ...selectedTask, due_date: e.target.value })}
+                            className="border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                        />
+                        <select value={selectedTask.status ?? ''} onChange={e => setSelectedTask({ ...selectedTask, status: e.target.value as Status })} className="border border-gray-200 rounded-lg px-3 py-2 text-sm">
+                            <option value="todo">To Do</option>
+                            <option value="in_progress">In Progress</option>
+                            <option value="in_review">In Review</option>
+                            <option value="done">Done</option>
+                        </select>
+                        <select value={selectedTask.priority ?? ''} onChange={e => setSelectedTask({ ...selectedTask, priority: e.target.value as Priority})} className="border border-gray-200 rounded-lg px-3 py-2 text-sm">
+                            <option value="low">Low</option>
+                            <option value="normal">Normal</option>
+                            <option value="high">High</option>
+                        </select>
+                        <div className="flex gap-3 justify-end mt-auto">
+                            <button onClick={() => setSelectedTask(null)} className="text-sm text-gray-500 hover:text-gray-700">
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => {
+                                    handleUpdate(selectedTask.id, {
+                                        title: selectedTask.title,
+                                        description: selectedTask.description,
+                                        due_date: selectedTask.due_date,
+                                        status: selectedTask.status,
+                                        priority: selectedTask.priority
+                                    })
+                                    setSelectedTask(null)
+                                }}
+                                className="bg-gray-900 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-gray-700 transition-colors"
+                            >
+                                Save
+                            </button>
+                        </div>
                     </div>
-                </div>
-
-                <div className="flex-1 bg-white border border-gray-200 rounded-xl shadow-sm p-6"
-                    onDragOver={e => e.preventDefault()}
-                    onDrop={e => handleDrop(e, 'in_review')}>
-                    <p className="text-sm font-medium text-purple-700 mb-4">
-                        In Review <span className="text-gray-400">({inReviewCount})</span>
-                    </p>
-                    <div className="flex flex-col gap-3">
-                        {loading ? (
-                            <div className="text-sm text-gray-400">Loading...</div>
-                        ) : inReviewCount === 0 ? (
-                            <div className="text-sm text-gray-400 text-center py-6">No tasks yet</div>
-                        ) : (
-                            filteredTasks.filter(t => t.status === 'in_review').map(task => (
-                                <TaskCard task={task} onDragStart={(e) => handleDragStart(e, task.id)} onDelete={() => handleDelete(task.id)} key={task.id} />
-                            ))
-                        )}
-                    </div>
-                </div>
-
-                <div className="flex-1 bg-white border border-gray-200 rounded-xl shadow-sm p-6"
-                    onDragOver={e => e.preventDefault()}
-                    onDrop={e => handleDrop(e, 'done')}>
-                    <p className="text-sm font-medium text-green-700 mb-4">Done<span className="text-gray-400">({doneCount})</span></p>
-                    <div className="flex flex-col gap-3">
-                        {loading ? (
-                            <div className="text-sm text-gray-400">Loading...</div>
-                        ) : doneCount === 0 ? (
-                            <div className="text-sm text-gray-400 text-center py-6">No tasks yet</div>
-                        ) : (
-                            filteredTasks.filter(t => t.status === 'done').map(task => (
-                                <TaskCard task={task} onDragStart={(e) => handleDragStart(e, task.id)} onDelete={() => handleDelete(task.id)} key={task.id} />
-                            ))
-                        )}
-                    </div>
-                </div>
+                )}
             </div>
         </div>
     );

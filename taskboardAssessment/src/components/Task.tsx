@@ -1,9 +1,11 @@
-import type {Task} from "../types";
+import type {Task, Status} from "../types";
 
 interface TaskProps {
     task: Task
     onDragStart: (e: React.DragEvent<HTMLDivElement>) => void
     onDelete: () => void;
+    onUpdate: (updates: {title?: string, description?: string, due_date?: string, status?: Status}) => void;
+    onClick: () => void;
 }
 
 const priorityColors = {
@@ -19,11 +21,13 @@ const statusColors = {
     done: 'bg-green-100 text-green-700',
 }
 
-function TaskCard({task, onDragStart, onDelete}: TaskProps) {
+function TaskCard({task, onDragStart, onDelete, onUpdate, onClick}: TaskProps) {
     return (
-    <div className="relative bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow group" 
+    <div className="relative bg-gray-50 border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow group" 
     draggable
-    onDragStart={onDragStart}>
+    onDragStart={onDragStart}
+    onClick={onClick}
+    >
         <button className="absolute top-0 right-1 text-gray-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
             onClick={onDelete}>x
         </button>
