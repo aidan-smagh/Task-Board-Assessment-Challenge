@@ -44,10 +44,8 @@ function Home() {
         const loadTasks = async () => {
             try {
                 const allTasks = await getAllTasks();
-                console.log(allTasks);
                 setTasks(allTasks);
             } catch (err) {
-                console.log(err);
                 setError("Failed to load tasks");
             }
             finally {
@@ -97,7 +95,6 @@ function Home() {
             });
 
             setTasks(prev => [...prev, newTask]);
-            console.log("Created:", newTask);
 
             // Reset form fields
             setTitle("");

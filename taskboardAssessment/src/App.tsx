@@ -17,21 +17,18 @@ function App() {
     })
   }, [])
 
-  useEffect(() => {
-    const initAuth = async () => {
-      const {data: {session}} = await supabase.auth.getSession();
-      console.log("session:", session);
+useEffect(() => {
+  const initAuth = async () => {
+    const { data: { session } } = await supabase.auth.getSession()
 
-      if (!session) {
-        const {data, error} = await supabase.auth.signInAnonymously();
-        console.log("anon sign in", data, error);
-      }
-      const {data: {session: newSession}} = await supabase.auth.getSession();
-      console.log("final session:", newSession);
-      setReady(true);
-    };
-    initAuth();
-  }, [])
+    if (!session) {
+      await supabase.auth.signInAnonymously()
+    }
+
+    setReady(true)
+  }
+  initAuth()
+}, [])
   if (!ready) return <div>Loading...</div>
 
   return <Home />

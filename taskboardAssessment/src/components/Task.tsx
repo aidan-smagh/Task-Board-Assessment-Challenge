@@ -13,14 +13,6 @@ const priorityColors = {
     normal: 'bg-yellow-100 text-yellow-700',
     high: 'bg-red-100 text-red-700', 
 }
-/*
-const statusColors = {
-    todo: 'bg-gray-100 text-gray-600',
-    in_progress: 'bg-blue-100 text-blue-700',
-    in_review: 'bg-purple-100 text-purple-700',
-    done: 'bg-green-100 text-green-700',
-}
-*/
 
 const getDueDateColors = (due_date: string) => {
     const today = new Date();
@@ -63,10 +55,6 @@ function TaskCard({task, onDragStart, onDelete, onClick}: TaskProps) {
             <p className="text-sm text-gray-500 mb-3">{task.description}</p>
         )}
         <div className="flex items-center justify-between">
-            {/*<span className={`text-xs px-2 py-1 rounded-full ${statusColors[task.status ?? 'todo']}`}>
-                {task.status?.replace('_', ' ')}
-            </span>
-            */}
             {task.due_date && (
             <span className={`text-xs ${getDueDateColors(task.due_date)} px-12`}>
                 {new Date(task.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
