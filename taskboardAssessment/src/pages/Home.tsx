@@ -166,12 +166,14 @@ function Home() {
                     <input value={description} onChange={e => setDescription(e.target.value)} placeholder="Description" className="border border-gray-200 rounded-lg px-3 py-2 text-sm flex-1" />
                     <input type="date" value={due_date} onChange={e => setDue_Date(e.target.value)} placeholder="Due date" className="border border-gray-200 rounded-lg px-3 py-2 text-sm" />
                     <select value={status} onChange={e => setStatus(e.target.value as Status)} className="border border-gray-200 rounded-lg px-3 py-2 text-sm">
+                        <option value="" disabled>Select status</option>
                         <option value="todo">To Do</option>
                         <option value="in_progress">In Progress</option>
                         <option value="in_review">In Review</option>
                         <option value="done">Done</option>
                     </select>
                     <select value={priority} onChange={e => setPriority(e.target.value as Priority)} className="border border-gray-200 rounded-lg px-3 py-2 text-sm">
+                        <option value="" disabled>Select priority</option>
                         <option value="low">Low</option>
                         <option value="normal">Normal</option>
                         <option value="high">High</option>
@@ -182,13 +184,13 @@ function Home() {
                 </form>
             )}
 
-            <div className="flex gap-4">
+            <div className="flex gap-4 h-[calc(100vh-200px)]">
                 {/* columns */}
                 <div className="flex gap-4 flex-1">
-                    <div className="flex-1 bg-white border border-gray-200 rounded-xl shadow-sm p-6"
+                    <div className="flex-1 bg-white border border-gray-200 rounded-xl shadow-sm p-6 overflow-y-auto"
                         onDragOver={e => e.preventDefault()}
                         onDrop={e => handleDrop(e, 'todo')}>
-                        <p className="text-sm font-medium text-gray-600 mb-4">To Do <span className="text-gray-400">({todoCount})</span></p>
+                        <p className="text-sm font-medium text-gray-600 mb-4 py-2">To Do <span className="text-gray-400">({todoCount})</span></p>
                         <div className="flex flex-col gap-3">
                             {loading ? (
                                 <div className="text-sm text-gray-400">Loading...</div>
@@ -202,10 +204,10 @@ function Home() {
                         </div>
                     </div>
 
-                    <div className="flex-1 bg-white border border-gray-200 rounded-xl shadow-sm p-6"
+                    <div className="flex-1 bg-white border border-gray-200 rounded-xl shadow-sm p-6 overflow-y-auto"
                         onDragOver={e => e.preventDefault()}
                         onDrop={e => handleDrop(e, 'in_progress')}>
-                        <p className="text-sm font-medium text-blue-700 mb-4">In Progress <span className="text-gray-400">({inProgressCount})</span></p>
+                        <p className="text-sm font-medium text-gray-600 mb-4 py-2">In Progress <span className="text-gray-400">({inProgressCount})</span></p>
                         <div className="flex flex-col gap-3">
                             {loading ? (
                                 <div className="text-sm text-gray-400">Loading...</div>
@@ -219,10 +221,10 @@ function Home() {
                         </div>
                     </div>
 
-                    <div className="flex-1 bg-white border border-gray-200 rounded-xl shadow-sm p-6"
+                    <div className="flex-1 bg-white border border-gray-200 rounded-xl shadow-sm p-6 overflow-y-auto"
                         onDragOver={e => e.preventDefault()}
                         onDrop={e => handleDrop(e, 'in_review')}>
-                        <p className="text-sm font-medium text-purple-700 mb-4">In Review <span className="text-gray-400">({inReviewCount})</span></p>
+                        <p className="text-sm font-medium text-gray-600 mb-4 py-2">In Review <span className="text-gray-400">({inReviewCount})</span></p>
                         <div className="flex flex-col gap-3">
                             {loading ? (
                                 <div className="text-sm text-gray-400">Loading...</div>
@@ -236,10 +238,10 @@ function Home() {
                         </div>
                     </div>
 
-                    <div className="flex-1 bg-white border border-gray-200 rounded-xl shadow-sm p-6"
+                    <div className="flex-1 bg-white border border-gray-200 rounded-xl shadow-sm p-6 overflow-y-auto"
                         onDragOver={e => e.preventDefault()}
                         onDrop={e => handleDrop(e, 'done')}>
-                        <p className="text-sm font-medium text-green-700 mb-4">Done <span className="text-gray-400">({doneCount})</span></p>
+                        <p className="text-sm font-medium text-gray-600 mb-4 py-2">Done <span className="text-gray-400">({doneCount})</span></p>
                         <div className="flex flex-col gap-3">
                             {loading ? (
                                 <div className="text-sm text-gray-400">Loading...</div>
@@ -256,7 +258,7 @@ function Home() {
 
                 {/* expanded panel */}
                 {selectedTask && (
-                    <div className="w-80 bg-white border border-gray-200 rounded-xl shadow-sm p-6 flex flex-col gap-4">
+                    <div className="w-64 bg-gray-200 border border-gray-200 rounded-xl shadow-sm p-6 flex flex-col gap-4 overflow-y-auto">
                         <div className="flex justify-between items-center">
                             <p className="text-gray-600 text-2xl font-semibold">Edit Task</p>
                             <button onClick={() => setSelectedTask(null)} className="text-gray-400 hover:text-gray-600">✕</button>
@@ -264,28 +266,28 @@ function Home() {
                         <input
                             value={selectedTask.title ?? ''}
                             onChange={e => setSelectedTask({ ...selectedTask, title: e.target.value })}
-                            className="border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                            className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white"
                             placeholder="Title"
                         />
                         <input
                             value={selectedTask.description ?? ''}
                             onChange={e => setSelectedTask({ ...selectedTask, description: e.target.value })}
-                            className="border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                            className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white"
                             placeholder="Description"
                         />
                         <input
                             type="date"
                             value={selectedTask.due_date ?? ''}
                             onChange={e => setSelectedTask({ ...selectedTask, due_date: e.target.value })}
-                            className="border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                            className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white"
                         />
-                        <select value={selectedTask.status ?? ''} onChange={e => setSelectedTask({ ...selectedTask, status: e.target.value as Status })} className="border border-gray-200 rounded-lg px-3 py-2 text-sm">
+                        <select value={selectedTask.status ?? ''} onChange={e => setSelectedTask({ ...selectedTask, status: e.target.value as Status })} className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white">
                             <option value="todo">To Do</option>
                             <option value="in_progress">In Progress</option>
                             <option value="in_review">In Review</option>
                             <option value="done">Done</option>
                         </select>
-                        <select value={selectedTask.priority ?? ''} onChange={e => setSelectedTask({ ...selectedTask, priority: e.target.value as Priority})} className="border border-gray-200 rounded-lg px-3 py-2 text-sm">
+                        <select value={selectedTask.priority ?? ''} onChange={e => setSelectedTask({ ...selectedTask, priority: e.target.value as Priority})} className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white">
                             <option value="low">Low</option>
                             <option value="normal">Normal</option>
                             <option value="high">High</option>

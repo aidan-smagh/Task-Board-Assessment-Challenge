@@ -54,7 +54,7 @@ function TaskCard({task, onDragStart, onDelete, onClick}: TaskProps) {
                 x
         </button>
          <div className="flex items-center justify-between mb-2">
-            <h3 className="font-medium text-gray-900">{task.title}</h3>
+            <h3 className="font-medium text-gray-900 break-words min-w-0 overflow-hidden flex-1">{task.title}</h3>
             <span className={`text-xs px-2 py-1 rounded-full font-medium ${priorityColors[task.priority ?? 'normal']}`}>
                 {task.priority}
             </span>
