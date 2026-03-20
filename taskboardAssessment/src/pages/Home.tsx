@@ -32,14 +32,13 @@ function Home() {
     //search and filter
     const [searchQuery, setSearchQuery] = useState("");
     const [priorityFilter, setPriorityFilter] = useState<Priority | 'all'>('all');
-    const filteredTasks = tasks.filter(t => t.title.toLowerCase().includes(searchQuery.toLowerCase()) && priorityFilter === 'all' || t.priority === priorityFilter);
+    const filteredTasks = tasks.filter(t => t.title.toLowerCase().includes(searchQuery.toLowerCase()) && (priorityFilter === 'all' || t.priority === priorityFilter));
 
     //counts
     const todoCount = filteredTasks.filter(t => t.status === 'todo').length;
     const inProgressCount = filteredTasks.filter(t => t.status === 'in_progress').length
     const inReviewCount = filteredTasks.filter(t => t.status === 'in_review').length
     const doneCount = filteredTasks.filter(t => t.status === 'done').length
-
 
     useEffect(() => {
         const loadTasks = async () => {
