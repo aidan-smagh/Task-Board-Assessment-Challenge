@@ -13,13 +13,14 @@ const priorityColors = {
     normal: 'bg-yellow-100 text-yellow-700',
     high: 'bg-red-100 text-red-700', 
 }
-
+/*
 const statusColors = {
     todo: 'bg-gray-100 text-gray-600',
     in_progress: 'bg-blue-100 text-blue-700',
     in_review: 'bg-purple-100 text-purple-700',
     done: 'bg-green-100 text-green-700',
 }
+*/
 
 const getDueDateColors = (due_date: string) => {
     const today = new Date();
